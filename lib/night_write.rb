@@ -64,7 +64,9 @@ class NightWrite
     string += "\n" + string + "\n" + string
   end
 
-
+  def self.export(filename, data)
+    File.write(filename, data)
+  end
 end
 
 
