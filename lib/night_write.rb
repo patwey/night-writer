@@ -1,10 +1,25 @@
 class NightWrite
-  def self.character_to_braille(character)
-    top_line = to_braille_top_line(character)
-    mid_line = to_braille_mid_line(character)
-    bot_line = to_braille_bot_line(character)
+  def self.to_braille(text)
+    chars = text.split('')
+    top, mid, bot = '', '', ''
+    chars.each do |char|
+      t, m, b = character_to_braille(char)
+      top += t
+      mid += m
+      bot += b
+    end
+    assemble_braille(top, mid, bot)
+  end
 
-    top_line + "\n" + mid_line + "\n" + bot_line
+  def self.assemble_braille(top, mid, bot)
+    top + "\n" + mid + "\n" + bot
+  end
+
+  def self.character_to_braille(character)
+    top = to_braille_top_line(character)
+    mid = to_braille_mid_line(character)
+    bot = to_braille_bot_line(character)
+    return top, mid, bot
   end
 
   def self.to_braille_top_line(character)
@@ -12,12 +27,16 @@ class NightWrite
     when 'c', 'd', 'f', 'g', 'm',
          'n', 'p', 'q', 'x', 'y'
       '00'
+    when ' '
+      '..'
     when 'a', 'b', 'e', 'h', 'k',
          'l', 'o', 'r', 'u', 'v',
          'z'
       '0.'
     when 'i', 'j', 's', 't', 'w'
       '.0'
+    when 'A'..'Z'
+      '..' + to_braille_top_line(character.downcase)
     else
       raise ArgumentError
     end
@@ -29,7 +48,7 @@ class NightWrite
          't', 'w'
       '00'
     when 'a' 'c', 'k', 'm', 'u',
-         'x'
+         'x', ' '
       '..'
     when 'b', 'f', 'i', 'l', 'p',
          's', 'v'
@@ -37,6 +56,8 @@ class NightWrite
     when 'd', 'e', 'n', 'o', 'y',
          'z'
       '.0'
+    when 'A'..'Z'
+      '..' + to_braille_mid_line(character.downcase)
     else
       raise ArgumentError
     end
@@ -48,13 +69,15 @@ class NightWrite
       '00'
     when 'a', 'b', 'c', 'd', 'e',
          'e', 'f', 'g', 'h', 'i',
-         'j'
+         'j', ' '
       '..'
     when 'k', 'l', 'm', 'n', 'o',
          'p', 'q', 'r', 's', 't'
       '0.'
     when 'w'
       '.0'
+    when 'A'..'Z'
+      '.0' + to_braille_bot_line(character.downcase)
     else
       raise ArgumentError
     end
