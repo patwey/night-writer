@@ -16,7 +16,6 @@ class NightWriteTest < Minitest::Test
   end
 
   def test_runs_in_the_command_line
-    skip
     `ruby ./lib/night_write.rb message.txt braille.txt`
     assert $?.success?
   end
@@ -42,7 +41,7 @@ class NightWriteTest < Minitest::Test
   end
 
   def test_translates_a_sentence_to_braille
-    hello_world_braille ="0.0.0.0.0....00.0.0.00\n00.00.0..0..00.0000..0\n....0.0.0....00.0.0..."
+    hello_world_braille = "0.0.0.0.0....00.0.0.00\n00.00.0..0..00.0000..0\n....0.0.0....00.0.0..."
     # .chomp
     assert_equal hello_world_braille.chomp, NightWrite.to_braille('hello world')
   end
@@ -50,7 +49,21 @@ class NightWriteTest < Minitest::Test
   def test_translates_capital_letters
     braille = assemble_braille_char('H')
     assert_equal "..0.\n..00\n.0..", braille
+
+    hello_world_caps_braille = "..0.0.0.0.0....00.0.0.00\n..00.00.0..0..00.0000..0\n.0....0.0.0....00.0.0..."
+    # Hello world
+
+    normal = NightWrite.to_normal_chars(hello_world_caps_braille)
+    assert_equal 'Hello world', normal
   end
-  # translates braille to normal characters
+
+  def test_translates_braille_to_normal_characters
+    hello_world_braille = "0.0.0.0.0....00.0.0.00\n00.00.0..0..00.0000..0\n....0.0.0....00.0.0..."
+    assert_equal 'hello world', NightWrite.to_normal_chars(hello_world_braille)
+
+    alphabet_braille = NightWrite.to_braille('abcdefghijklmnopqrstuvwxyz')
+    translated_to_normal = NightWrite.to_normal_chars(alphabet_braille)
+    assert_equal 'abcdefghijklmnopqrstuvwxyz', translated_to_normal
+  end
 
 end
