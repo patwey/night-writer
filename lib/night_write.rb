@@ -3,20 +3,20 @@ require 'pry'
 class NightWrite
   def self.to_braille(text)
     chars = text.split('')
-    top, mid, bot = '', '', ''
-    chars.each do |char|
-      unless char == "\n"
-        t, m, b = character_to_braille(char)
-        top += t
-        mid += m
-        bot += b
-      end
-    end
-    assemble_braille(top, mid, bot)
+    top, mid, bot = get_lines(chars)
+    assemble_braille_lines(top, mid, bot)
   end
 
-  def self.assemble_braille(top, mid, bot)
-    top + "\n" + mid + "\n" + bot
+  def self.get_lines(chars)
+    top, mid, bot = '', '', ''
+    chars.each do |char|
+      next if char == "\n"
+      t, m, b = character_to_braille(char)
+      top += t
+      mid += m
+      bot += b
+    end
+    return top, mid, bot
   end
 
   def self.character_to_braille(character)
@@ -39,11 +39,10 @@ class NightWrite
       '0.'
     when 'i', 'j', 's', 't', 'w'
       '.0'
-    when 'A'..'Z' # break into its own method
+    when 'A'..'Z'
       '..' + to_braille_top_line(character.downcase)
-    # when '0'..'9' # break into its own method
     else
-      raise ArgumentError
+      fail ArgumentError
     end
   end
 
@@ -63,10 +62,8 @@ class NightWrite
       '.0'
     when 'A'..'Z'
       '..' + to_braille_mid_line(character.downcase)
-    # when '0'..'9'
-    #   '.0'
     else
-      raise ArgumentError
+      fail ArgumentError
     end
   end
 
@@ -85,11 +82,38 @@ class NightWrite
       '.0'
     when 'A'..'Z'
       '.0' + to_braille_bot_line(character.downcase)
-    # when '0'..'9'
-    #   '00'
     else
-      raise ArgumentError
+      fail ArgumentError
     end
+  end
+
+  def self.assemble_braille_lines(top, mid, bot)
+    if too_wide?(top)
+      next_top, next_mid, next_bot = wrap_to_next_line(top, mid, bot)
+      format_braille(top, mid, bot) +
+        "\n" + format_braille(next_top, next_mid, next_bot)
+    else
+      format_braille(top, mid, bot)
+    end
+  end
+
+  def self.too_wide?(line)
+    line.length > 80
+  end
+  
+  def self.wrap_to_next_line(top, mid, bot)
+    next_top = top.slice!(80..-1)
+    next_mid = mid.slice!(80..-1)
+    next_bot = bot.slice!(80..-1)
+    return next_top, next_mid, next_bot
+  end
+
+  def self.format_braille(top, mid, bot)
+    top + "\n" + mid + "\n" + bot
+  end
+
+  def self.import(filename)
+    File.read(filename)
   end
 
   def self.export(filename, data)
@@ -97,14 +121,13 @@ class NightWrite
   end
 end
 
-
 if $PROGRAM_NAME == __FILE__ # if I'm running this file
   input_file = ARGV[0]
   output_file = ARGV[1]
 
-  text = File.read(input_file)
+  text = NightWrite.import(input_file)
   braille = NightWrite.to_braille(text)
-  File.write(output_file, braille.strip)
+  NightWrite.export(output_file, braille.strip)
 
   puts "Created '#{output_file}' containing #{braille.chars.count} characters"
 end

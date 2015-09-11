@@ -1,4 +1,4 @@
-require_relative '../lib/night_read'
+require 'night_read'
 require 'pry'
 
 class NightReadTest < Minitest::Test
@@ -37,9 +37,4 @@ class NightReadTest < Minitest::Test
 
     assert_equal 'Hello world', normal
   end
-
-  def test_it_reads_numbers
-    skip
-  end
-
 end
