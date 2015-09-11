@@ -39,8 +39,9 @@ class NightWrite
       '0.'
     when 'i', 'j', 's', 't', 'w'
       '.0'
-    when 'A'..'Z'
+    when 'A'..'Z' # break into its own method
       '..' + to_braille_top_line(character.downcase)
+    # when '0'..'9' # break into its own method
     else
       raise ArgumentError
     end
@@ -62,6 +63,8 @@ class NightWrite
       '.0'
     when 'A'..'Z'
       '..' + to_braille_mid_line(character.downcase)
+    # when '0'..'9'
+    #   '.0'
     else
       raise ArgumentError
     end
@@ -82,74 +85,15 @@ class NightWrite
       '.0'
     when 'A'..'Z'
       '.0' + to_braille_bot_line(character.downcase)
+    # when '0'..'9'
+    #   '00'
     else
       raise ArgumentError
     end
   end
 
-  def self.echo_characters(string)
-    string += "\n" + string + "\n" + string
-  end
-
   def self.export(filename, data)
     File.write(filename, data)
-  end
-
-  def self.to_normal_chars(braille)
-    # expects braille as a string separated by \n
-    top, mid, bot = get_lines(braille)
-    braille_chars = braille_lines_to_chars(top, mid, bot)
-    normal_chars = braille_to_normal_chars(braille_chars)
-    normal_chars.join
-  end
-
-  def self.braille_to_normal_chars(braille_chars)
-    # what if capital letter??
-    braille_map = File.open('braille_mapping.txt')
-    normal_chars = []
-    braille_chars.each do |braille_char|
-      braille_map.rewind # start at the top of the file each time
-      equivalent = find_equivalent(braille_char, braille_map)
-      normal_chars << equivalent
-    end
-    normal_chars = capitalize(normal_chars)
-  end
-
-  def self.capitalize(normal_chars)
-    # expects capital letters to be lowercase letters preceded by CAPITAL
-    normal_chars.each_with_index do |char, idx|
-      normal_chars[idx + 1].upcase! if char == 'CAPITAL'
-    end
-    normal_chars.delete('CAPITAL')
-    normal_chars
-  end
-
-  def self.find_equivalent(braille_char, braille_map)
-    braille_map.each_line do |line|
-      equivalents = line.chomp.split(',')
-      return equivalents[1] if braille_char == equivalents[0]
-    end
-    nil # neccessary?
-  end
-
-  def self.braille_lines_to_chars(top, mid, bot)
-    braille_chars = []
-    count = 0
-    while count < top.size
-      char = [top.slice(count, 2), mid.slice(count, 2),
-             bot.slice(count, 2)].flatten.join('')
-      braille_chars << char
-      count += 2
-    end
-    braille_chars
-  end
-
-  def self.get_lines(braille)
-    lines = braille.split("\n")
-    top = lines[0]
-    mid = lines[1]
-    bot = lines[2]
-    return top, mid, bot
   end
 end
 

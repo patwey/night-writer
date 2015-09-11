@@ -1,4 +1,5 @@
 require_relative '../lib/night_write'
+require_relative '../lib/night_read'
 require 'pry'
 
 class NightWriteTest < Minitest::Test
@@ -20,50 +21,38 @@ class NightWriteTest < Minitest::Test
     assert $?.success?
   end
 
-  def test_outputs_the_input_line_three_times
-    assert_equal "hello world\nhello world\nhello world", NightWrite.echo_characters('hello world')
-  end
-
-  def test_translates_a_normal_character_to_the_braille_equivalent
-    braille = assemble_braille_char('h')
-    assert_equal "0.\n00\n..", braille
-
-    braille = assemble_braille_char('b')
-    assert_equal "0.\n0.\n..", braille
-
-    braille = assemble_braille_char('y')
-    assert_equal "00\n.0\n00", braille
-  end
-
   def test_outputs_braille_characters_to_a_file
     export(@output_file, assemble_braille_char('h'))
     assert_equal "0.\n00\n..", File.read(@output_file)
   end
 
-  def test_translates_a_sentence_to_braille
+  def test_writes_normal_characters_to_braille
+    braille = assemble_braille_char('h')
+    assert_equal "0.\n00\n..", braille
+
+    braille = assemble_braille_char('b')
+    assert_equal "0.\n0.\n..", braille
+  end
+
+  def test_writes_a_sentence_to_braille
     hello_world_braille = "0.0.0.0.0....00.0.0.00\n00.00.0..0..00.0000..0\n....0.0.0....00.0.0..."
     # .chomp
     assert_equal hello_world_braille.chomp, NightWrite.to_braille('hello world')
   end
 
-  def test_translates_capital_letters
+  def test_writes_capital_letters_to_braille
+    braille = assemble_braille_char('B')
+    assert_equal "..0.\n..0.\n.0..", braille
+
     braille = assemble_braille_char('H')
     assert_equal "..0.\n..00\n.0..", braille
-
-    hello_world_caps_braille = "..0.0.0.0.0....00.0.0.00\n..00.00.0..0..00.0000..0\n.0....0.0.0....00.0.0..."
-    # Hello world
-
-    normal = NightWrite.to_normal_chars(hello_world_caps_braille)
-    assert_equal 'Hello world', normal
   end
 
-  def test_translates_braille_to_normal_characters
-    hello_world_braille = "0.0.0.0.0....00.0.0.00\n00.00.0..0..00.0000..0\n....0.0.0....00.0.0..."
-    assert_equal 'hello world', NightWrite.to_normal_chars(hello_world_braille)
-
-    alphabet_braille = NightWrite.to_braille('abcdefghijklmnopqrstuvwxyz')
-    translated_to_normal = NightWrite.to_normal_chars(alphabet_braille)
-    assert_equal 'abcdefghijklmnopqrstuvwxyz', translated_to_normal
+  def test_it_writes_numbers
+    skip
+    braille = assemble_braille_char('1')
+    assert_equal ".00.\n.0..\n00..", braille
   end
 
+  # only_writes_braille_eighty_characters_wide_then_starts_a_new_line_three_lines_down
 end
